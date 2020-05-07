@@ -2,22 +2,18 @@ const express = require('express');
 const app = express();
 const mongoose = require('mongoose');
 require('dotenv/config');
-
-app.use(express.urlencoded({ extended: true }));
-app.use(express.json());
+const Middleware = require('./middlewares');
 
 // Import routes
 const accountsRoute = require('./routes/accounts');
 
-app.use('/login', (req, res, next) => {
-  console.log('middleware is running...');
-  next();
-})
+app.use(express.urlencoded({ extended: true }));
+app.use(express.json());
+
+// Middleware
+app.use(Middleware.verifyToken);
 
 // Routes
-app.get('/', (req, res) => {
-  res.send('welcome');
-});
 app.use('/account', accountsRoute);
 
 // Connect to Database

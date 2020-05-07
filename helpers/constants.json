@@ -3,5 +3,8 @@
   "NEW": "NEW",
   "NOT_VALID": "NOT_VALID",
   "NOT_FOUND": "NOT_FOUND",
-  "FOUND": "FOUND"
+  "FOUND": "FOUND",
+  "UPDATED": "UPDATED",
+  "DELETED": "DELETED",
+  "FAILED": "FAILED"
 }
