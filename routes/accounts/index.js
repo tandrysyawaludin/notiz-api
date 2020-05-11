@@ -2,18 +2,25 @@ const express = require('express');
 const router = express.Router();
 const Account = require('../../models/Account');
 const Middleware = require('../../middlewares');
-const { NEW, DUPLICATED, NOT_VALID, NOT_FOUND, FOUND, DELETED, FAILED } = require('../../helpers/constants');
+const {
+  NEW,
+  DUPLICATED,
+  NOT_VALID,
+  NOT_FOUND,
+  FOUND,
+  DELETED,
+  FAILED
+} = require('../../helpers/ErrorCodes');
 
-router.get('/generateGuestToken', async (req, res) => {
+router.get('/generateGuestToken', (req, res) => {
   const { headers } = req;
 
   try {
-    const token = await Middleware.generateToken(
+    const token = Middleware.generateToken(
       { 
         name: 'guest', 
         email: 'guest', 
-        phone_number: 'guest', 
-        created_at: Date.now()
+        phone_number: 'guest'
       }
       , headers
     )
@@ -21,8 +28,8 @@ router.get('/generateGuestToken', async (req, res) => {
     res.json({
       status: 'success',
       code: NEW,
-      message: 'create token for guest',
-      token
+      message: 'success create token for guest',
+      token: token
     });
   } catch (error) {
     res.json({
@@ -33,12 +40,26 @@ router.get('/generateGuestToken', async (req, res) => {
   }
 });
 
-router.get('/findAll', async (req, res) => {
-  const accounts = await Account.find();
-  res.json(accounts)
+router.get('/findAll', Middleware.checkLoggedIn(), async (req, res) => {
+  try {
+    const accounts = await Account.find();
+    res.json({
+      status: 'success',
+      code: FOUND,
+      message: 'accounts are found',
+      data: account
+    })
+  } catch (error) {
+    res.json({
+      status: 'success',
+      code: NOT_FOUND,
+      message: 'account is not available',
+      data: account
+    })
+  }
 });
 
-router.get('/findById/:accountId', async (req, res) => {
+router.get('/findById/:accountId', Middleware.checkLoggedIn(), async (req, res) => {
   try {
     const account = await findById(req.params.accountId);
     res.json({
@@ -63,7 +84,7 @@ router.get('/findById/:accountId', async (req, res) => {
   }
 });
 
-router.post('/create', async (req, res) => {
+router.post('/create', Middleware.checkLoggedIn(), async (req, res) => {
   const { name, email, phone_number, password } = req.body;
   const account = new Account({ name, email, password, phone_number });
 
@@ -97,7 +118,7 @@ router.post('/create', async (req, res) => {
   }
 });
 
-router.post('/auth', async (req, res) => {
+router.post('/auth', Middleware.checkLoggedIn(), async (req, res) => {
   const { body, headers } = req;
   const { email, password } = body;
 
@@ -136,7 +157,7 @@ router.post('/auth', async (req, res) => {
   }
 });
 
-router.delete('/:accountId', async (req, res) => {
+router.delete('/:accountId', Middleware.checkLoggedIn(), async (req, res) => {
   try {
     const account = await remove({ _id: req.params.accountId });
     res.json({
@@ -149,7 +170,7 @@ router.delete('/:accountId', async (req, res) => {
   }
 });
 
-router.patch('/:accountId', async (req, res) => {
+router.patch('/:accountId', Middleware.checkLoggedIn(), async (req, res) => {
   const { name, email, phone_number, password } = req.body;
 
   try {
